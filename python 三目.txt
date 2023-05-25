@@ -1,0 +1,95 @@
+abc
+from tkinter import *
+from tkinter import ttk
+
+squares = 3
+
+
+class TictacApp(ttk.Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.create_widgets()
+        self.set_value()
+
+    def set_value(self):
+        self.player = 1
+        self.field = []
+        for i in range(squares):
+            self.field.append(['' for i in range(squares)])
+        self.finish = 0
+
+    def create_widgets(self):
+        for i in range(squares):
+            for j in range(squares):
+                button = ttk.Button(self, command=self.record(i, j))
+                button.bind('<Button-1>', self.mark)
+                button.grid(column=i, row=j, sticky=(N, S, E, W))
+
+        for i in range(squares):
+            self.columnconfigure(i, weight=1)
+            self.rowconfigure(i, weight=1)
+
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+
+        self.grid(column=0, row=0, sticky=(N, S, E, W))
+
+    def mark(self, event):
+        if not event.widget['text']:
+            if self.player == 1:
+                event.widget['text'] = str('〇')
+            else:
+                event.widget['text'] = str('×')
+
+    def record(self, i, j):
+        def x():
+            if not self.field[i][j]:
+                self.field[i][j] = self.player
+                self.line_check()
+                self.change_player()
+                self.clear()
+        return x
+
+    def change_player(self):
+        if self.finish == 0:
+            self.player = -self.player
+
+    def line_check(self):
+        cross = 0
+        for i in range(squares):
+            horizon = 0
+            vertical = 0
+            for j in range(squares):
+                if self.field[i][j] == self.player:
+                    horizon += 1
+                if self.field[j][i] == self.player:
+                    vertical += 1
+            if self.field[i][i] == self.player:
+                cross += 1
+            if horizon == 3 or vertical == 3 or cross == 3:
+                self.game_end()
+        if self.field[0][2] == self.field[1][1] == self.field[2][0] == self.player:
+            self.game_end()
+
+    def game_end(self):
+        if self.player == 1:
+            messagebox.showinfo('先行プレイヤーの勝利です！')
+        else:
+            messagebox.showinfo('後攻プレイヤーの勝利です！')
+        self.finish = 1
+
+    def clear(self):
+        if self.finish == 1:
+            self.create_widgets()
+            self.set_value()
+
+
+def main():
+    root = Tk()
+    root.title('三目並べ')
+    TictacApp(root)
+    root.mainloop()
+
+
+if __name__ == '__main__':
+    main()
